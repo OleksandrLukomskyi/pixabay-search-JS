@@ -22,7 +22,7 @@ const newApiSevice = new NewApiServise();
 refs.searchForm.addEventListener('submit', handleSubmit);
 loadMoreBtn.refs.button.addEventListener('click', onLoadMore);
 
-function handleSubmit(event) {
+async function handleSubmit(event) {
   event.preventDefault();
   if (newApiSevice.query === []) {
     return alert('Введи щось добре');
@@ -32,20 +32,26 @@ function handleSubmit(event) {
 
   newApiSevice.query = event.currentTarget.elements.searchQuery.value;
   newApiSevice.resetPage();
-  newApiSevice.fetchFoto().then(hits => {
+
+  try {
+    const hits = await newApiSevice.fetchFoto();
     appendHitsMarkup(hits);
     loadMoreBtn.enable();
-  });
+  } catch (error) {
+    console.error('Error fetching photos:', error);
+  }
 }
 
-function onLoadMore() {
+async function onLoadMore() {
   loadMoreBtn.disable();
-  newApiSevice.fetchFoto().then(hits => {
+  try {
+    const hits = await newApiSevice.fetchFoto();
     emptyArrayHits(hits);
-    loadMoreBtn.enable();
     clearHitsContainet();
     appendHitsMarkup(hits);
-  });
+  } catch (error) {
+    console.error('Error fetching more photos:', error);
+  }
 }
 // ([
 //   { webformatURL, tags, likes, views, comments, downloads },
@@ -55,6 +61,7 @@ function appendHitsMarkup(hits) {
   const markup = hits
     .map(
       ({
+        largeImageURL,
         webformatURL,
         tags,
         likes,
@@ -62,7 +69,9 @@ function appendHitsMarkup(hits) {
         comments,
         downloads,
       }) => `<div class="photo-card">
+      <a href="${largeImageURL}" class="gallery-link simplelightbox">
       <img class="gallery__image" src="${webformatURL}" alt="${tags}" loading="lazy" />
+      </a>
       <div class="info">
         <p class="info-item js-info-likes">
           <b>Likes ${likes}</b>
@@ -84,9 +93,6 @@ function appendHitsMarkup(hits) {
   refs.renderingGallery.innerHTML = markup;
 }
 
-// function appendHitsMarkup(hits) {
-//   refs.renderingGallery.insertAdjacentHTML('beforeend', hitsTpl(hits));
-// }
 function clearHitsContainet() {
   refs.renderingGallery.innerHTML = '';
 }
@@ -101,3 +107,10 @@ function emptyArrayHits() {
     return alert('Введи щось добре');
   }
 }
+
+// galleryContainer.style.listStyle = 'none';
+const lightbox = new SimpleLightbox('.simplelightbox', {
+  /* options */
+  captionsData: 'alt',
+  captionDelay: 250,
+});

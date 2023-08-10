@@ -7,18 +7,16 @@ export default class NewApiServise {
     this.page = 1;
   }
 
-  fetchFoto() {
-    return axios
-      .get(
+  async fetchFoto() {
+    try {
+      const response = await axios.get(
         `${BASE_URL}/?key=${BASE_API_KEY}&q=${this.searchQuery}&image_type=photo&orientation=horizontal&safesearch=true&page=${this.page}&per_page=8`
-      )
-      .then(data => {
-        this.page += 1;
-        return data.data.hits;
-      })
-      .catch(error => {
-        console.log(error);
-      });
+      );
+      this.page += 1;
+      return response.data.hits;
+    } catch (error) {
+      console.log(error);
+    }
   }
   resetPage() {
     this.page = 1;
