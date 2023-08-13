@@ -34,7 +34,14 @@ img {
   display: none;
 }
 
-.button > .spinner.is-hidden {
+/* .button > .spinner.is-hidden {
   display: none;
+} */
+
+.btn {
+cursor: pointer;
 }
 
+.btn-load-more {
+  margin-top: 60px;
+}

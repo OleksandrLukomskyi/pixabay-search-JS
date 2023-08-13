@@ -10,10 +10,10 @@ export default class NewApiServise {
   async fetchFoto() {
     try {
       const response = await axios.get(
-        `${BASE_URL}/?key=${BASE_API_KEY}&q=${this.searchQuery}&image_type=photo&orientation=horizontal&safesearch=true&page=${this.page}&per_page=8`
+        `${BASE_URL}/?key=${BASE_API_KEY}&q=${this.searchQuery}&image_type=photo&orientation=horizontal&safesearch=true&page=${this.page}&per_page=40`
       );
       this.page += 1;
-      return response.data.hits;
+      return response.data;
     } catch (error) {
       console.log(error);
     }
