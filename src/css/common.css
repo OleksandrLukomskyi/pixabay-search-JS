@@ -28,20 +28,11 @@ img {
   display: block;
   margin-left: auto;
   margin-right: auto;
+  cursor: pointer;
 }
 
-.button.is-hidden {
-  display: none;
-}
-
-/* .button > .spinner.is-hidden {
-  display: none;
-} */
 
 .btn {
 cursor: pointer;
 }
 
-.btn-load-more {
-  margin-top: 60px;
-}

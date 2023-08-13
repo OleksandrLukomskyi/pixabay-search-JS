@@ -39,7 +39,6 @@
 .info {
   display: flex;
   justify-content: center;
-  /* grid-template-columns: repeat(2, 1fr); */
   gap: 25px;
   
 }

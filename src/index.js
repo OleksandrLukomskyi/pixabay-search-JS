@@ -5,19 +5,16 @@ import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
 import Notiflix from 'notiflix';
+import 'notiflix/src/notiflix.css';
+
+import debounce from 'lodash.debounce';
 
 import NewApiServise from './api.js';
-import LoadMoreBtn from './load-more-btn';
 
 const refs = {
   searchForm: document.querySelector('.search-form'),
   renderingGallery: document.querySelector('.gallery'),
 };
-
-const loadMoreBtn = new LoadMoreBtn({
-  selector: '[data-action="load-more"]',
-  hidden: true,
-});
 
 const newApiService = new NewApiServise();
 const lightbox = new SimpleLightbox('.gallery a', {
@@ -26,14 +23,10 @@ const lightbox = new SimpleLightbox('.gallery a', {
 });
 
 refs.searchForm.addEventListener('submit', handleSubmit);
-loadMoreBtn.refs.button.addEventListener('click', onLoadMore);
+window.addEventListener('scroll', debounce(onScroll, 800));
 
 async function handleSubmit(event) {
   event.preventDefault();
-
-  // loadMoreBtn.hide();
-
-  // loadMoreBtn.disable();
 
   const query = event.currentTarget.elements.searchQuery.value.trim();
 
@@ -51,16 +44,12 @@ async function handleSubmit(event) {
       Notiflix.Notify.failure(
         '"Sorry, there are no images matching your search query. Please try again."'
       );
-      console.log(loadMoreBtn.hide);
+      clearHitsContainet();
     } else {
       Notiflix.Notify.success(`"Hooray! We found ${totalHits} images."`);
 
       appendHitsMarkup(hits);
       lightbox.refresh();
-      loadMoreBtn.disable();
-      loadMoreBtn.show();
-
-      loadMoreBtn.enable();
     }
   } catch (error) {
     console.error('Error fetching photos:', error);
@@ -68,24 +57,17 @@ async function handleSubmit(event) {
 }
 
 async function onLoadMore() {
-  // if (hits.length === O) {
-  //   loadMoreBtn.hide();
-  // }
-  // loadMoreBtn.enable();
   try {
     const response = await newApiService.fetchFoto();
     const totalHits = response.totalHits;
 
     const hits = response.hits;
 
-    // loadMoreBtn.disable();
     emptyArrayHits(hits);
     clearHitsContainet();
 
     appendHitsMarkup(hits);
     lightbox.refresh();
-
-    // loadMoreBtn.enable();
   } catch (error) {
     console.error('Error fetching more photos:', error);
   }
@@ -142,5 +124,14 @@ function emptyArrayHits(hits) {
       '"Sorry, there are no images matching your search query. Please try again."'
     );
     loadMoreBtn.hide();
+  }
+}
+
+function onScroll() {
+  const scrollPosition = Math.ceil(window.scrollY);
+  const bodyHeight = Math.ceil(document.body.getBoundingClientRect().height);
+  const screenHeight = window.screen.height;
+  if (bodyHeight - scrollPosition < screenHeight) {
+    onLoadMore();
   }
 }
