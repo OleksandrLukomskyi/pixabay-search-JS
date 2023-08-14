@@ -21,6 +21,8 @@ const lightbox = new SimpleLightbox('.gallery a', {
   captionsData: 'alt',
   captionDelay: 250,
 });
+let maxPage = 0;
+let page = newApiService.page;
 
 refs.searchForm.addEventListener('submit', handleSubmit);
 window.addEventListener('scroll', debounce(onScroll, 800));
@@ -44,12 +46,12 @@ async function handleSubmit(event) {
       Notiflix.Notify.failure(
         '"Sorry, there are no images matching your search query. Please try again."'
       );
-      clearHitsContainet();
     } else {
       Notiflix.Notify.success(`"Hooray! We found ${totalHits} images."`);
-
+      clearHitsContainet();
       appendHitsMarkup(hits);
       lightbox.refresh();
+      maxPage = Math.ceil(hits / 40);
     }
   } catch (error) {
     console.error('Error fetching photos:', error);
@@ -64,7 +66,7 @@ async function onLoadMore() {
     const hits = response.hits;
 
     emptyArrayHits(hits);
-    clearHitsContainet();
+    // clearHitsContainet();
 
     appendHitsMarkup(hits);
     lightbox.refresh();
@@ -111,7 +113,7 @@ function appendHitsMarkup(hits) {
     )
     .join('');
 
-  refs.renderingGallery.innerHTML = markup;
+  refs.renderingGallery.insertAdjacentHTML('beforeend', markup);
 }
 
 function clearHitsContainet() {
@@ -132,6 +134,12 @@ function onScroll() {
   const bodyHeight = Math.ceil(document.body.getBoundingClientRect().height);
   const screenHeight = window.screen.height;
   if (bodyHeight - scrollPosition < screenHeight) {
-    onLoadMore();
+    if (page <= maxPage) {
+      onLoadMore();
+    } else {
+      Notiflix.Notify.failure(
+        "We're sorry, but you've reached the end of search results."
+      );
+    }
   }
 }
