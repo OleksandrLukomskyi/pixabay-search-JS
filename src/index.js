@@ -22,7 +22,6 @@ const lightbox = new SimpleLightbox('.gallery a', {
   captionDelay: 250,
 });
 let maxPage = 0;
-let page = newApiService.page;
 
 refs.searchForm.addEventListener('submit', handleSubmit);
 window.addEventListener('scroll', debounce(onScroll, 800));
@@ -51,7 +50,8 @@ async function handleSubmit(event) {
       clearHitsContainet();
       appendHitsMarkup(hits);
       lightbox.refresh();
-      maxPage = Math.ceil(hits / 40);
+
+      maxPage = Math.ceil(totalHits / 40);
     }
   } catch (error) {
     console.error('Error fetching photos:', error);
@@ -61,13 +61,9 @@ async function handleSubmit(event) {
 async function onLoadMore() {
   try {
     const response = await newApiService.fetchFoto();
-    const totalHits = response.totalHits;
-
     const hits = response.hits;
 
     emptyArrayHits(hits);
-    // clearHitsContainet();
-
     appendHitsMarkup(hits);
     lightbox.refresh();
   } catch (error) {
@@ -125,7 +121,6 @@ function emptyArrayHits(hits) {
     Notiflix.Notify.failure(
       '"Sorry, there are no images matching your search query. Please try again."'
     );
-    loadMoreBtn.hide();
   }
 }
 
@@ -134,7 +129,7 @@ function onScroll() {
   const bodyHeight = Math.ceil(document.body.getBoundingClientRect().height);
   const screenHeight = window.screen.height;
   if (bodyHeight - scrollPosition < screenHeight) {
-    if (page <= maxPage) {
+    if (newApiService.page <= maxPage) {
       onLoadMore();
     } else {
       Notiflix.Notify.failure(
